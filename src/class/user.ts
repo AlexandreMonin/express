@@ -12,7 +12,7 @@ export default class User {
   firstName: String;
   email: String;
   password: String;
-  command: Command[];
+  command?: Command[];
 
   /**
    *Define a new user
@@ -30,7 +30,7 @@ export default class User {
     firstName: string;
     email: string;
     password: string;
-    command: Command[];
+    command?: Command[];
   }) {
     this.id = id;
     this.lastName = lastName;
@@ -64,7 +64,7 @@ export default class User {
       const response: DbResult = {
         code: 200,
         message: "User created",
-        user: user
+        user: user,
       };
 
       //Retourner la réponse
@@ -87,5 +87,41 @@ export default class User {
       //Retourner la réponse
       return error;
     }
+  }
+
+  /**
+   * FindByEmail
+   */
+  public async FindByEmail(): Promise<DbResult> {
+    //Rechercher l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: {
+        email: this.email.toString(),
+      },
+    });
+
+    let result: DbResult = {
+      code: 200,
+      message: "User found",
+      user: user,
+    };
+    switch (user) {
+      case null:
+        result = {
+          code: 404,
+          message: "User not found",
+          user: user,
+        };
+        break;
+      default:
+        result = {
+          code: 200,
+          message: "User found",
+          user: user,
+        };
+        break;
+    }
+
+    return result;
   }
 }

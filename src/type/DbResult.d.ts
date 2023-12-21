@@ -7,7 +7,7 @@ type DbResult = {
         firstName: string;
         email: string;
         password: string;
-    },
+    }?,
 };
 
 export default DbResult;
