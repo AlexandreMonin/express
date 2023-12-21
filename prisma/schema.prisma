@@ -9,3 +9,40 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+//Définir le modèle User
+model User {
+  id        Int       @id @default(autoincrement())
+  lastname  String    @db.VarChar(255)
+  firstname String    @db.VarChar(255)
+  email     String    @unique @db.VarChar(255)
+  password  String
+  command   Command[]
+}
+
+//Définir le modèle Product
+model Product {
+  id              Int               @id @default(autoincrement())
+  name            String
+  description     String?
+  price           Int
+  Orders_Products Orders_Products[]
+}
+
+//Définir le modèle Command
+model Command {
+  id              Int               @id @default(autoincrement())
+  commandNumber   Int
+  userId          Int
+  user            User              @relation(fields: [userId], references: [id])
+  Orders_Products Orders_Products[]
+}
+
+model Orders_Products {
+  commandId Int
+  command   Command @relation(fields: [commandId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@id([commandId, productId])
+}
