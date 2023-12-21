@@ -2,6 +2,7 @@ import express, { Router, Request } from "express";
 import User from "../class/user";
 import bcrypt from "bcrypt";
 import DbResult from "../type/DbResult";
+import jwt from 'jsonwebtoken';
 
 //Définir le router
 const router: Router = express.Router();
@@ -56,14 +57,14 @@ router.post("/signin", async (req, res) => {
     if (!isPasswordSame) {
       res.status(401).send("Mail or password invalid");
     } else {
-        
+        const token = jwt.sign({user}, process.env.SECRET_KEY, {
+            expiresIn: "1h",
+        });
+        res.status(200).json({"email": user.email, "token": token});
     }
   } else {
     res.status(401).send("Mail or password invalid");
   }
-
-  console.log(findInDb.user);
-  res.send(findInDb.user);
 });
 
 //Modifier un utilisateur

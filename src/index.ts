@@ -3,6 +3,7 @@ import userRouter from "./routes/user";
 import commandRouter from "./routes/command";
 import productRouter from "./routes/product";
 import prisma from "./utils/database";
+import "dotenv/config";
 
 async function main() {
   //Définir l'application
