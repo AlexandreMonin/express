@@ -38,6 +38,7 @@ model Command {
   Orders_Products Orders_Products[]
 }
 
+//Définir la table pivot entre Command et Product
 model Orders_Products {
   commandId Int
   command   Command @relation(fields: [commandId], references: [id])
