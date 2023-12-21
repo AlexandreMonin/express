@@ -6,7 +6,8 @@ const router: Router = express.Router();
 //Récupérer un utilisateur grâce à son mail
 router.get("/:email", (req: Request<{email: String}>, res) => {
     const { email }  = req.params;
-})
+
+});
 
 //Créer un utilisateur
 router.post("/add", (req, res) => {
