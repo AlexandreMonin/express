@@ -12,7 +12,7 @@ export default class Product {
   /**
    *Define a new product
    */
-  constructor(id: number, name: String, price: number, description?: String, orders_products: Orders_Products[]) {
+  constructor(id: number, name: String, price: number, orders_products: Orders_Products[], description?: String) {
     this.id = id;
     this.name = name;
     this.price = price;
