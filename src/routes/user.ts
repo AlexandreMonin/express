@@ -3,12 +3,13 @@ import User from "../class/user";
 import bcrypt from "bcrypt";
 import DbResult from "../type/DbResult";
 import jwt from 'jsonwebtoken';
+import passport from "passport";
 
 //Définir le router
 const router: Router = express.Router();
 
 //Récupérer un utilisateur grâce à son mail
-router.get("/:email", (req: Request<{ email: String }>, res) => {
+router.get("/:email", passport.authenticate("jwt", {session: false}), (req: Request<{ email: String }>, res) => {
   const { email } = req.params;
 });
 
@@ -68,12 +69,12 @@ router.post("/signin", async (req, res) => {
 });
 
 //Modifier un utilisateur
-router.put("/:email", (req: Request<{ email: String }>, res) => {
+router.put("/:email", passport.authenticate("jwt", {session: false}), (req: Request<{ email: String }>, res) => {
   const { email } = req.params;
 });
 
 //Supprimer un utilisateur
-router.delete("/:email", (req: Request<{ email: String }>, res) => {
+router.delete("/:email", passport.authenticate("jwt", {session: false}), (req: Request<{ email: String }>, res) => {
   const { email } = req.params;
 });
 

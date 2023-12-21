@@ -6,7 +6,7 @@ const router: Router = express.Router();
 //Récupérer une commande grâce à son id
 router.get("/:id", (req: Request<{id: Number}>, res) => {
     const { id }  = req.params;
-
+    res.status(200).send(id);
 });
 
 //Créer une commande

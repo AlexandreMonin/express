@@ -4,6 +4,8 @@ import commandRouter from "./routes/command";
 import productRouter from "./routes/product";
 import prisma from "./utils/database";
 import "dotenv/config";
+import "./utils/passport";
+import passport from "passport";
 
 async function main() {
   //Définir l'application
@@ -13,6 +15,8 @@ async function main() {
   //Parser automatiquement les body entrant en json
   app.use(express.json());
 
+  app.use(passport.initialize());
+
   //Définir les routes
   app.get("/", (req, res) => {
     res.status(200).send("Bienvenue !");
@@ -20,8 +24,8 @@ async function main() {
 
   //Utiliser les routes définies dans les router
   app.use("/users", userRouter);
-  app.use("/commands", commandRouter);
-  app.use("/products", productRouter);
+  app.use("/commands", passport.authenticate("jwt", {session: false}), commandRouter);
+  app.use("/products", passport.authenticate("jwt", {session: false}), productRouter);
 
   //Démarrer l'application
   app.listen(port, () => {
