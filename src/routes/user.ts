@@ -13,8 +13,9 @@ const router: Router = express.Router();
 router.get(
   "/:email",
   passport.authenticate("jwt", { session: false }),
-  (req: Request<{ email: String }>, res) => {
-    const { email } = req.params;
+  isAdmin,
+  (req: Request<{ email: string }>, res: Response) => {
+    const { email }: {email: string} = req.params;
   }
 );
 
@@ -35,7 +36,7 @@ router.post(
 
       //Renvoyer la réponse
       result.user
-        ? res.status(result.code).json({ "User created": result.user })
+        ? res.status(result.code).json({ "user": result.user })
         : res.status(result.code).send(result.message);
     } catch (e: any) {
       //Log l'erreur
@@ -77,22 +78,62 @@ router.post("/signin", async (req, res) => {
 });
 
 //Modifier un utilisateur
-router.put(
+router.patch(
   "/:email",
-  isAdmin,
   passport.authenticate("jwt", { session: false }),
-  (req: Request<{ email: string }>, res) => {
+  isAdmin,
+  async (req: Request<{ email: string }, {}, User>, res) => {
     const { email } : {email: string} = req.params;
+    const newUser: User = req.body;    
+
+    //Créer le produit
+    const user: User = new User({id: 0, email: email, firstName: "", lastName: "", password: "", role: 0});
+
+    try {
+      //Chercher le produit
+      const result: DbResult = await user.Update(newUser);
+
+      //Renvoyer la réponse
+      result.user
+        ? res.status(result.code).json({ "User updated": result.user })
+        : res.status(result.code).send(result.message);
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Retourner l'erreur
+      res.status(500).send("Error while updating user");
+    }
   }
 );
 
 //Supprimer un utilisateur
 router.delete(
   "/:email",
-  isAdmin,
   passport.authenticate("jwt", { session: false }),
-  (req: Request<{ email: string }>, res) => {
+  isAdmin,
+  async (req: Request<{ email: string }, {}, User>, res) => {
     const { email } : {email: string} = req.params;
+    const newUser: User = req.body;
+
+    //Créer le produit
+    const user: User = new User({id: 0, email: email, firstName: "", lastName: "", password: "", role: 0});
+
+    try {
+      //Chercher le produit
+      const result: DbResult = await user.Delete();
+
+      //Renvoyer la réponse
+      result.user
+        ? res.status(result.code).json({ "User deleted": result.user })
+        : res.status(result.code).send(result.message);
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Retourner l'erreur
+      res.status(500).send("Error while adding product");
+    }
   }
 );
 

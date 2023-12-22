@@ -33,7 +33,7 @@ model Product {
 //Définir le modèle Command
 model Command {
   id              Int               @id @default(autoincrement())
-  commandNumber   Int
+  commandNumber   String
   userId          Int
   user            User              @relation(fields: [userId], references: [id])
   Orders_Products Orders_Products[]
@@ -45,6 +45,7 @@ model Orders_Products {
   command   Command @relation(fields: [commandId], references: [id])
   productId Int
   product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
 
   @@id([commandId, productId])
 }

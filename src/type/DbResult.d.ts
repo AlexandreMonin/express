@@ -1,10 +1,12 @@
-import { Product, User } from "@prisma/client";
+import { Product, User, Command, Products } from "@prisma/client";
 
 type DbResult = {
-    code: number;
-    message: string;
-    user?: User?,
-    product?: Product?,
+  code: number;
+  message: string;
+  user?: User?;
+  product?: Product?;
+  command?: Command?;
+  products?: Products? ;
 };
 
 export default DbResult;

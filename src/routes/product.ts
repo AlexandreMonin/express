@@ -4,6 +4,7 @@ import DbResult from "../type/DbResult";
 import UserRole from "../type/UserRole";
 import isManager from "../middlewares/isManager";
 import isAdmin from "../middlewares/isAdmin";
+import isAdminOrManager from "../middlewares/isAdminOrManager";
 
 //Définir le router
 const router: Router = express.Router();
@@ -11,7 +12,7 @@ const router: Router = express.Router();
 //Récupérer un produit grâce à son id
 router.get(
   "/:id",
-  (isManager || isAdmin),
+  isAdminOrManager,
   async (req: Request<{ id: string }>, res: Response) => {
     const id: number = parseInt(req.params.id);
 
@@ -37,7 +38,7 @@ router.get(
 );
 
 //Créer un produit
-router.post("/add", (isManager || isAdmin), async (req, res) => {
+router.post("/add", isAdminOrManager, async (req, res) => {
   const product: Product = new Product(req.body);
 
   try {
@@ -58,12 +59,10 @@ router.post("/add", (isManager || isAdmin), async (req, res) => {
 //Modifier un produit
 router.patch(
   "/:id",
-  (isManager || isAdmin),
+  isAdminOrManager,
   async (req: Request<{ id: string }, {}, Product>, res: Response) => {
     const id: number = parseInt(req.params.id);
     const newProduct: Product = req.body;
-
-    console.log(newProduct);
 
     //Créer le produit
     const product: Product = new Product({ id: id, name: "", price: 0.0 });
@@ -81,7 +80,7 @@ router.patch(
       console.error(e);
 
       //Retourner l'erreur
-      res.status(500).send("Error while adding product");
+      res.status(500).send("Error while updating the product");
     }
   }
 );
@@ -89,7 +88,7 @@ router.patch(
 //Supprimer un produit
 router.delete(
   "/:id",
-  (isManager || isAdmin),
+  isAdminOrManager,
   async (req: Request<{ id: string }, {}, Product>, res: Response) => {
     const id: number = parseInt(req.params.id);
     const newProduct: Product = req.body;
