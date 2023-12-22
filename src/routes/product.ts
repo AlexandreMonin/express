@@ -6,8 +6,27 @@ import DbResult from "../type/DbResult";
 const router: Router = express.Router();
 
 //Récupérer un produit grâce à son id
-router.get("/:id", (req: Request<{ id: Number }>, res) => {
-  const { id } = req.params;
+router.get("/:id", async (req: Request<{ id: number }>, res) => {
+  const { id }: { id: number } = req.params;
+
+  //Créer le produit
+  const product: Product = new Product({ id: id, name: "", price: 0.0 });
+
+  try {
+    //Chercher le produit
+    const result: DbResult = await product.FindById();
+
+    //Renvoyer la réponse
+    result.product
+      ? res.status(result.code).json({ "Product found": result.product })
+      : res.status(result.code).send(result.message);
+  } catch (e: any) {
+    //Log l'erreur
+    console.error(e);
+
+    //Retourner l'erreur
+    res.status(500).send("Error while adding product");
+  }
 });
 
 //Créer un produit
@@ -30,8 +49,30 @@ router.post("/add", async (req, res) => {
 });
 
 //Modifier un produit
-router.put("/:id", (req: Request<{ id: Number }>, res) => {
-  const { id } = req.params;
+router.patch("/:id", async (req: Request<{ id: number }, {}, Product>, res) => {
+  const { id }: { id: number } = req.params;
+    const newProduct: Product = req.body; 
+
+    console.log(newProduct);
+
+  //Créer le produit
+  const product: Product = new Product({ id: id, name: "", price: 0.0 });
+
+  try {
+    //Chercher le produit
+    const result: DbResult = await product.Update(newProduct);
+
+    //Renvoyer la réponse
+    result.product
+      ? res.status(result.code).json({ "Product updated": result.product })
+      : res.status(result.code).send(result.message);
+  } catch (e: any) {
+    //Log l'erreur
+    console.error(e);
+
+    //Retourner l'erreur
+    res.status(500).send("Error while adding product");
+  }
 });
 
 //Supprimer un produit
