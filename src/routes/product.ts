@@ -51,9 +51,9 @@ router.post("/add", async (req, res) => {
 //Modifier un produit
 router.patch("/:id", async (req: Request<{ id: number }, {}, Product>, res) => {
   const { id }: { id: number } = req.params;
-    const newProduct: Product = req.body; 
+  const newProduct: Product = req.body;
 
-    console.log(newProduct);
+  console.log(newProduct);
 
   //Créer le produit
   const product: Product = new Product({ id: id, name: "", price: 0.0 });
@@ -76,9 +76,34 @@ router.patch("/:id", async (req: Request<{ id: number }, {}, Product>, res) => {
 });
 
 //Supprimer un produit
-router.delete("/:id", (req: Request<{ id: Number }>, res) => {
-  const { id } = req.params;
-});
+router.delete(
+  "/:id",
+  async (req: Request<{ id: number }, {}, Product>, res) => {
+    const { id }: { id: number } = req.params;
+    const newProduct: Product = req.body;
+
+    console.log(newProduct);
+
+    //Créer le produit
+    const product: Product = new Product({ id: id, name: "", price: 0.0 });
+
+    try {
+      //Chercher le produit
+      const result: DbResult = await product.Delete();
+
+      //Renvoyer la réponse
+      result.product
+        ? res.status(result.code).json({ "Product deleted": result.product })
+        : res.status(result.code).send(result.message);
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Retourner l'erreur
+      res.status(500).send("Error while adding product");
+    }
+  }
+);
 
 //Exporter le router
 export default router;

@@ -50,7 +50,7 @@ export default class Product {
 
       //Créer la réponse
       const response: DbResult = {
-        code: 200,
+        code: 201,
         message: "Product created",
         product: product,
       };
@@ -120,44 +120,91 @@ export default class Product {
    * Update
 newProduct: Product   */
   public async Update(newProduct: Product): Promise<DbResult> {
-        //Définir le retour
-        let result: DbResult = {
-          code: 200,
-          message: "Product updated",
+    //Définir le retour
+    let result: DbResult = {
+      code: 201,
+      message: "Product updated",
+    };
+
+    try {
+      //Chercher le produit
+      const product = await prisma.product.update({
+        where: {
+          id: parseInt(this.id.toString()),
+        },
+        data: {
+          name: newProduct.name?.toString(),
+          description: newProduct.description?.toString(),
+          price: parseFloat(newProduct?.price.toString()),
+        },
+      });
+
+      //Assigner le produit s'il existe;
+      product
+        ? (result.product = product)
+        : (result = { code: 404, message: "Product not found" });
+
+      //Retourner le produit
+      return result;
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Créer la réponse
+      result = {
+        code: 500,
+        message: "An error has occured",
+      };
+
+      //Retourner la réponse
+      return result;
+    }
+  }
+
+  /**
+   * Delete
+   */
+  public async Delete(): Promise<DbResult> {
+    //Définir le retour
+    let result: DbResult = {
+      code: 200,
+      message: "Product deleted",
+    };
+
+    try {
+      //Chercher le produit
+      const product = await prisma.product.delete({
+        where: {
+          id: parseInt(this.id.toString()),
+        },
+      });
+
+      //Assigner le produit s'il existe;
+      product
+        ? (result.product = product)
+        : (result = { code: 500, message: "An error has occured" });
+
+      //Retourner le produit
+      return result;
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Créer la réponse
+      if (e.code == "P2025"){
+        result = {
+          code: 404,
+          message: "Product not found",
         };
-    
-        try {
-          //Chercher le produit
-          const product = await prisma.product.update({
-            where: {
-              id: parseInt(this.id.toString()),
-            },
-            data: {
-              name: newProduct.name?.toString(),
-              description: newProduct.description?.toString(),
-              price: parseFloat(newProduct?.price.toString()),
-            },
-          });
-    
-          //Assigner le produit s'il existe;
-          product
-            ? (result.product = product)
-            : (result = { code: 404, message: "Product not found" });
-    
-          //Retourner le produit
-          return result;
-        } catch (e: any) {
-          //Log l'erreur
-          console.error(e);
-    
-          //Créer la réponse
-          result = {
-            code: 500,
-            message: "An error has occured",
-          };
-    
-          //Retourner la réponse
-          return result;
-        }
+      } else {
+        result = {
+          code: 500,
+          message: "An error has occured",
+        };
+      }
+
+      //Retourner la réponse
+      return result;
+    }
   }
 }

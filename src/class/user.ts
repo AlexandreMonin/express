@@ -62,7 +62,7 @@ export default class User {
 
       //Créer la réponse
       const response: DbResult = {
-        code: 200,
+        code: 201,
         message: "User created",
         user: user,
       };
