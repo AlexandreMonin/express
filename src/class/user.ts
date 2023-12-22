@@ -3,6 +3,7 @@ import prisma from "../utils/database";
 import DbResult from "../type/DbResult";
 import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+import UserRole from "../type/UserRole";
 
 //Définir la classe User
 export default class User {
@@ -12,6 +13,7 @@ export default class User {
   firstName: String;
   email: String;
   password: String;
+  role: UserRole;
   command?: Command[];
 
   /**
@@ -23,6 +25,7 @@ export default class User {
     firstName,
     email,
     password,
+    role,
     command,
   }: {
     id: number;
@@ -30,6 +33,7 @@ export default class User {
     firstName: string;
     email: string;
     password: string;
+    role: UserRole;
     command?: Command[];
   }) {
     this.id = id;
@@ -37,6 +41,7 @@ export default class User {
     this.firstName = firstName;
     this.email = email;
     this.password = password;
+    this.role = role;
     this.command = command;
   }
 

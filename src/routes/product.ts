@@ -1,6 +1,7 @@
 import express, { Router, Request } from "express";
 import Product from "../class/product";
 import DbResult from "../type/DbResult";
+import UserRole from "../type/UserRole";
 
 //Définir le router
 const router: Router = express.Router();
@@ -8,7 +9,7 @@ const router: Router = express.Router();
 //Récupérer un produit grâce à son id
 router.get("/:id", async (req: Request<{ id: number }>, res) => {
   const { id }: { id: number } = req.params;
-
+  
   //Créer le produit
   const product: Product = new Product({ id: id, name: "", price: 0.0 });
 

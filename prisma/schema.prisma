@@ -17,6 +17,7 @@ model User {
   firstName String    @db.VarChar(255)
   email     String    @unique @db.VarChar(255)
   password  String
+  role      Int       @default(2)
   command   Command[]
 }
 
@@ -35,7 +36,7 @@ model Command {
   commandNumber   Int
   userId          Int
   user            User              @relation(fields: [userId], references: [id])
-  Orders_Products Orders_Products[] 
+  Orders_Products Orders_Products[]
 }
 
 //Définir la table pivot entre Command et Product
