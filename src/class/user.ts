@@ -48,21 +48,28 @@ export default class User {
   /**
    * AddToDb
    */
-  public async AddToDb(): Promise<DbResult> {
+  public async AddToDb(isAdmin?: boolean): Promise<DbResult> {
     try {
       const encryptedPassword: string = await bcrypt.hash(
         this.password.toString(),
         15
       );
 
+      let data = {
+        lastName: this.lastName.toString(),
+        firstName: this.firstName.toString(),
+        email: this.email.toString(),
+        password: encryptedPassword,
+        role: 2
+      };
+
+      if (isAdmin) {
+        data = {...data, role: 0};
+      }
+
       //Créer l'utilisateur
       const user = await prisma.user.create({
-        data: {
-          lastName: this.lastName.toString(),
-          firstName: this.firstName.toString(),
-          email: this.email.toString(),
-          password: encryptedPassword,
-        },
+        data: data,
       });
 
       //Créer la réponse

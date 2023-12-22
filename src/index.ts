@@ -6,7 +6,7 @@ import prisma from "./utils/database";
 import "dotenv/config";
 import "./utils/passport";
 import passport from "passport";
-import isAdmin from "./utils/isAdmin";
+import isAdmin from "./middlewares/isAdmin";
 
 async function main() {
   //Définir l'application
