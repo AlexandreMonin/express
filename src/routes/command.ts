@@ -14,10 +14,35 @@ const router: Router = express.Router();
 //Récupérer une commande grâce à son id
 router.get(
   "/:id",
-  isManager || isAdmin,
-  (req: Request<{ id: string }>, res: Response) => {
+  isAdminOrManager,
+  async (req: Request<{ id: string }>, res: Response) => {
     const id: number = parseInt(req.params.id);
-    res.status(200).send(id);
+
+    try {
+      const command = await prisma.command.findUnique({
+        where: {
+          id: id,
+        },
+      });
+
+      //Retourner la réponse
+      res.status(201).json({
+        message: "Command created",
+        command: command,
+      });
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Créer la réponse
+      let error: DbResult = {
+        code: 500,
+        message: "An error has occured",
+      };
+
+      //Retourner la réponse
+      res.status(500).send("An error has occured");
+    }
   }
 );
 
