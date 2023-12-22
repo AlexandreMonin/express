@@ -25,7 +25,6 @@ router.post("/signup", async (req, res) => {
     //Ajouter l'utilisateur en base
     const result: DbResult = await user.AddToDb();
 
-    console.log(result.user);
     //Renvoyer la réponse
     result.user
       ? res.status(result.code).json({ "User created": result.user })
