@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import DbResult from "../type/DbResult";
 import jwt from "jsonwebtoken";
 import passport from "passport";
-import { signinValidator } from "../middlewares/formValidator";
 
 //Définir le router
 const router: Router = express.Router();
@@ -20,21 +19,18 @@ router.get(
 
 //Créer un utilisateur
 router.post(
-  "/signup/:isAdmin?",
-  async (req: Request<{ isAdmin: number }>, res: Response) => {
+  "/signup/:Role",
+  async (req: Request<{ Role: number }>, res: Response) => {
     //Définir l'utilisateur à partir du body
     const user: User = new User(req.body);
-    const { isAdmin }: { isAdmin: number } = req.params;
+    const { Role }: { Role: number } = req.params;
 
+    console.log(Role);
     //Ajouter l'utilisateur en base de données
     try {
       let result: DbResult;
       //Ajouter l'utilisateur en base
-      if (isAdmin == 1) {
-        result = await user.AddToDb(true);
-      } else {
-        result = await user.AddToDb(false);
-      }
+      result = await user.AddToDb(Role);
 
       //Renvoyer la réponse
       result.user

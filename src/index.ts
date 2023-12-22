@@ -6,7 +6,6 @@ import prisma from "./utils/database";
 import "dotenv/config";
 import "./utils/passport";
 import passport from "passport";
-import isAdmin from "./middlewares/isAdmin";
 
 async function main() {
   //Définir l'application
@@ -27,7 +26,7 @@ async function main() {
 
   app.use("/users", userRouter);
   app.use("/commands", passport.authenticate("jwt", {session: false}), commandRouter);
-  app.use("/products", passport.authenticate("jwt", {session: false}), isAdmin, productRouter);
+  app.use("/products", passport.authenticate("jwt", {session: false}), productRouter);
 
   //Démarrer l'application
   app.listen(port, () => {
