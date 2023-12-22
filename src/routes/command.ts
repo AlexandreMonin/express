@@ -6,6 +6,7 @@ import DbResult from "../type/DbResult";
 import User from "../class/user";
 import Orders_Products from "../class/orders_products";
 import prisma from "../utils/database";
+import isAdminOrManager from "../middlewares/isAdminOrManager";
 
 //Définir le router
 const router: Router = express.Router();
@@ -25,7 +26,7 @@ router.post(
   "/add",
   async (req: Request<{}, {}, Orders_Products[]>, res: Response) => {
     const products: Orders_Products[] = req.body;
-console.log(products);
+    console.log(products);
     const user: User = req.user as User;
 
     try {
@@ -37,16 +38,15 @@ console.log(products);
         },
       });
 
-      await products.forEach(async element => {
+      await products.forEach(async (element) => {
         const product = await prisma.orders_Products.create({
           data: {
             productId: element.productId,
             commandId: command.id,
-            quantity: element.quantity
+            quantity: element.quantity,
           },
         });
       });
-     
 
       //Retourner la réponse
       res.status(201).json({
@@ -71,20 +71,86 @@ console.log(products);
 );
 
 //Modifier une commande
-router.put(
-  "/:id",
-  isManager || isAdmin,
-  (req: Request<{ id: string }>, res: Response) => {
+router.patch(
+  "/",
+  isAdminOrManager,
+  async (req: Request<{ id: string }, {}, Orders_Products>, res: Response) => {
     const id: number = parseInt(req.params.id);
+    const product: Orders_Products = req.body;
+
+    try {
+      const db = await prisma.orders_Products.update({
+        where: {
+          commandId_productId: {
+            commandId: product.commandId,
+            productId: product.productId,
+          },
+        },
+        data: {
+          quantity: product.quantity,
+        },
+      });
+
+      //Retourner la réponse
+      res.status(201).json({
+        message: "Command modified",
+        product: db,
+      });
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Créer la réponse
+      let error: DbResult = {
+        code: 500,
+        message: "An error has occured",
+      };
+
+      //Retourner la réponse
+      res.status(500).send("An error has occured");
+    }
   }
 );
 
 //Supprimer une commande
 router.delete(
   "/:id",
-  isManager || isAdmin,
-  (req: Request<{ id: string }>, res: Response) => {
+  isAdminOrManager,
+  async (req: Request<{ id: string }>, res: Response) => {
     const id: number = parseInt(req.params.id);
+
+    try {
+      const orders_Products = await prisma.orders_Products.deleteMany({
+        where: {
+          commandId: id,
+        },
+      });
+
+      const command = await prisma.command.deleteMany({
+        where: {
+          id: id,
+        },
+      });
+
+      //Retourner la réponse
+      res.status(200).json({
+        message: "Command supprimé",
+        command: command,
+        product: orders_Products,
+      });
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Créer la réponse
+      let error: DbResult = {
+        code: 500,
+        message: "An error has occured",
+      };
+
+      //Retourner la réponse
+      res.status(500).send("An error has occured");
+    }
   }
 );
 
