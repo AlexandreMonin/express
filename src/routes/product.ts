@@ -25,7 +25,7 @@ router.get(
 
       //Renvoyer la réponse
       result.product
-        ? res.status(result.code).json({ "Product found": result.product })
+        ? res.status(result.code).json({ "product": result.product })
         : res.status(result.code).send(result.message);
     } catch (e: any) {
       //Log l'erreur
@@ -45,7 +45,7 @@ router.post("/add", isAdminOrManager, async (req, res) => {
     const result: DbResult = await product.AddToDb();
 
     result.product
-      ? res.status(result.code).json({ "Product created": result.product })
+      ? res.status(result.code).json({ "product": result.product })
       : res.status(result.code).send(result.message);
   } catch (e: any) {
     //Log l'erreur
@@ -73,7 +73,7 @@ router.patch(
 
       //Renvoyer la réponse
       result.product
-        ? res.status(result.code).json({ "Product updated": result.product })
+        ? res.status(result.code).json({ "product": result.product })
         : res.status(result.code).send(result.message);
     } catch (e: any) {
       //Log l'erreur
@@ -104,7 +104,7 @@ router.delete(
 
       //Renvoyer la réponse
       result.product
-        ? res.status(result.code).json({ "Product deleted": result.product })
+        ? res.status(result.code).json({ "product": result.product })
         : res.status(result.code).send(result.message);
     } catch (e: any) {
       //Log l'erreur

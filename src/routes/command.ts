@@ -38,14 +38,12 @@ router.post(
         },
       });
 
-      await products.forEach(async (element) => {
-        const product = await prisma.orders_Products.create({
-          data: {
-            productId: element.productId,
-            commandId: command.id,
-            quantity: element.quantity,
-          },
-        });
+      const product = await prisma.orders_Products.createMany({
+        data: products.map((prod) => ({
+          productId: prod.productId,
+          commandId: command.id,
+          quantity: prod.quantity,
+        })),
       });
 
       //Retourner la réponse
