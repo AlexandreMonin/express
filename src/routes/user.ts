@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import DbResult from "../type/DbResult";
 import jwt from "jsonwebtoken";
 import passport from "passport";
+import isAdmin from "../middlewares/isAdmin";
 
 //Définir le router
 const router: Router = express.Router();
@@ -78,18 +79,20 @@ router.post("/signin", async (req, res) => {
 //Modifier un utilisateur
 router.put(
   "/:email",
+  isAdmin,
   passport.authenticate("jwt", { session: false }),
-  (req: Request<{ email: String }>, res) => {
-    const { email } = req.params;
+  (req: Request<{ email: string }>, res) => {
+    const { email } : {email: string} = req.params;
   }
 );
 
 //Supprimer un utilisateur
 router.delete(
   "/:email",
+  isAdmin,
   passport.authenticate("jwt", { session: false }),
-  (req: Request<{ email: String }>, res) => {
-    const { email } = req.params;
+  (req: Request<{ email: string }>, res) => {
+    const { email } : {email: string} = req.params;
   }
 );
 
