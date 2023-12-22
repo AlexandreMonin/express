@@ -5,6 +5,7 @@ import DbResult from "../type/DbResult";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 import isAdmin from "../middlewares/isAdmin";
+import prisma from "../utils/database";
 
 //Définir le router
 const router: Router = express.Router();
@@ -14,8 +15,33 @@ router.get(
   "/:email",
   passport.authenticate("jwt", { session: false }),
   isAdmin,
-  (req: Request<{ email: string }>, res: Response) => {
-    const { email }: {email: string} = req.params;
+  async (req: Request<{ email: string }>, res: Response) => {
+    const { email }: { email: string } = req.params;
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
+
+      //Retourner la réponse
+      res.status(201).json({
+        message: "user",
+        user: user,
+      });
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Créer la réponse
+      let error: DbResult = {
+        code: 500,
+        message: "An error has occured",
+      };
+
+      //Retourner la réponse
+      res.status(500).send("An error has occured");
+    }
   }
 );
 
@@ -36,7 +62,7 @@ router.post(
 
       //Renvoyer la réponse
       result.user
-        ? res.status(result.code).json({ "user": result.user })
+        ? res.status(result.code).json({ user: result.user })
         : res.status(result.code).send(result.message);
     } catch (e: any) {
       //Log l'erreur
@@ -83,11 +109,18 @@ router.patch(
   passport.authenticate("jwt", { session: false }),
   isAdmin,
   async (req: Request<{ email: string }, {}, User>, res) => {
-    const { email } : {email: string} = req.params;
-    const newUser: User = req.body;    
+    const { email }: { email: string } = req.params;
+    const newUser: User = req.body;
 
     //Créer le produit
-    const user: User = new User({id: 0, email: email, firstName: "", lastName: "", password: "", role: 0});
+    const user: User = new User({
+      id: 0,
+      email: email,
+      firstName: "",
+      lastName: "",
+      password: "",
+      role: 0,
+    });
 
     try {
       //Chercher le produit
@@ -113,11 +146,18 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   isAdmin,
   async (req: Request<{ email: string }, {}, User>, res) => {
-    const { email } : {email: string} = req.params;
+    const { email }: { email: string } = req.params;
     const newUser: User = req.body;
 
     //Créer le produit
-    const user: User = new User({id: 0, email: email, firstName: "", lastName: "", password: "", role: 0});
+    const user: User = new User({
+      id: 0,
+      email: email,
+      firstName: "",
+      lastName: "",
+      password: "",
+      role: 0,
+    });
 
     try {
       //Chercher le produit
