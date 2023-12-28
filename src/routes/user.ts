@@ -15,6 +15,33 @@ router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
   isAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const users = await prisma.user.findMany();
+
+      //Retourner la réponse
+      if (!users) {
+        res.status(404).send("No users found");
+      } else {
+        res.status(200).json({
+          users: users,
+        });
+      }
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Retourner la réponse
+      res.status(500).send("An error has occured");
+    }
+  }
+);
+
+//Récupérer un utilisateur grâce à son mail
+router.get(
+  "/:email",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
   async (req: Request<{ email: string }>, res: Response) => {
     const { email }: { email: string } = req.params;
     try {
@@ -25,60 +52,23 @@ router.get(
       });
 
       //Retourner la réponse
-      res.status(201).json({
-        message: "user",
-        user: user,
-      });
+      if(!user){
+        res.status(404).send("User not found");
+      } else {
+        res.status(200).json({
+          user: user,
+        });
+      }
+    
     } catch (e: any) {
       //Log l'erreur
       console.error(e);
-
-      //Créer la réponse
-      let error: DbResult = {
-        code: 500,
-        message: "An error has occured",
-      };
 
       //Retourner la réponse
       res.status(500).send("An error has occured");
     }
   }
 );
-
-//Récupérer un utilisateur grâce à son mail
-// router.get(
-//   "/:email",
-//   passport.authenticate("jwt", { session: false }),
-//   isAdmin,
-//   async (req: Request<{ email: string }>, res: Response) => {
-//     const { email }: { email: string } = req.params;
-//     try {
-//       const user = await prisma.user.findUnique({
-//         where: {
-//           email: email,
-//         },
-//       });
-
-//       //Retourner la réponse
-//       res.status(201).json({
-//         message: "user",
-//         user: user,
-//       });
-//     } catch (e: any) {
-//       //Log l'erreur
-//       console.error(e);
-
-//       //Créer la réponse
-//       let error: DbResult = {
-//         code: 500,
-//         message: "An error has occured",
-//       };
-
-//       //Retourner la réponse
-//       res.status(500).send("An error has occured");
-//     }
-//   }
-// );
 
 //Créer un utilisateur
 router.post(
