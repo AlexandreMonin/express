@@ -1,4 +1,3 @@
-import User from '../class/user';
 import passport from 'passport';
 import { ExtractJwt, Strategy } from "passport-jwt";
 

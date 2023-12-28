@@ -26,7 +26,7 @@ async function main() {
 
   app.use("/users", userRouter);
   app.use("/commands", passport.authenticate("jwt", {session: false}), commandRouter);
-  app.use("/products", passport.authenticate("jwt", {session: false}), productRouter);
+  app.use("/products", productRouter);
 
   //Démarrer l'application
   app.listen(port, () => {
