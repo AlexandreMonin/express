@@ -152,7 +152,7 @@ router.patch(
   "/",
   passport.authenticate("jwt", { session: false }),
   isAdmin,
-  async (req: Request<{ email: string }, {}, User>, res) => {
+  async (req: Request<{}, {}, User>, res) => {
     const newUser: User = req.body;
     let encryptedPassword: string | undefined = undefined;
 
@@ -188,42 +188,36 @@ router.patch(
   }
 );
 
-// //Supprimer un utilisateur
-// router.delete(
-//   "/:email",
-//   passport.authenticate("jwt", { session: false }),
-//   isAdmin,
-//   async (req: Request<{ email: string }, {}, User>, res) => {
-//     const { email }: { email: string } = req.params;
-//     const newUser: User = req.body;
+//Supprimer un utilisateur
+router.delete(
+  "/:email",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  async (req: Request<{ email: string }, {}, User>, res) => {
+    const { email }: { email: string } = req.params;
 
-//     //Créer le produit
-//     const user: User = new User({
-//       id: 0,
-//       email: email,
-//       firstName: "",
-//       lastName: "",
-//       password: "",
-//       role: 0,
-//     });
+    try {
+      const user = await prisma.user.delete({
+        where: {
+          email: email,
+        },
+      });
 
-//     try {
-//       //Chercher le produit
-//       const result: DbResult = await user.Delete();
+      res.status(200).json({ "User deleted": user })
 
-//       //Renvoyer la réponse
-//       result.user
-//         ? res.status(result.code).json({ "User deleted": result.user })
-//         : res.status(result.code).send(result.message);
-//     } catch (e: any) {
-//       //Log l'erreur
-//       console.error(e);
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
 
-//       //Retourner l'erreur
-//       res.status(500).send("Error while adding product");
-//     }
-//   }
-// );
+      //Retourner l'erreur
+      if(e.code == 'P2025'){
+        res.status(404).send("Error while deleting user: it doesn't exist");
+      } else {
+        res.status(500).send("Error while deleting user");
+      }
+    }
+  }
+);
 
 //Exporter le router
 export default router;
