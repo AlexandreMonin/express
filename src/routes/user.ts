@@ -52,14 +52,14 @@ router.get(
       });
 
       //Retourner la réponse
-      if(!user){
+      if (!user) {
         res.status(404).send("User not found");
       } else {
         res.status(200).json({
           user: user,
         });
       }
-    
+
     } catch (e: any) {
       //Log l'erreur
       console.error(e);
@@ -147,42 +147,46 @@ router.post("/signin", async (req: Request<{}, {}, User>, res: Response) => {
   }
 });
 
-// //Modifier un utilisateur
-// router.patch(
-//   "/:email",
-//   passport.authenticate("jwt", { session: false }),
-//   isAdmin,
-//   async (req: Request<{ email: string }, {}, User>, res) => {
-//     const { email }: { email: string } = req.params;
-//     const newUser: User = req.body;
+//Modifier un utilisateur
+router.patch(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  async (req: Request<{ email: string }, {}, User>, res) => {
+    const newUser: User = req.body;
+    let encryptedPassword: string | undefined = undefined;
 
-//     //Créer le produit
-//     const user: User = new User({
-//       id: 0,
-//       email: email,
-//       firstName: "",
-//       lastName: "",
-//       password: "",
-//       role: 0,
-//     });
+    try {
+      if(newUser.password){
+        encryptedPassword = await bcrypt.hash(
+          newUser.password.toString(),
+          15
+        );
+      }
+      
+      const user = await prisma.user.update({
+        where: {
+          email: newUser.email.toString(),
+        },
+        data: {
+          email: newUser.email?.toString(),
+          lastName: newUser.lastName?.toString(),
+          firstName: newUser.firstName?.toString(),
+          password: encryptedPassword,
+        },
+      });
 
-//     try {
-//       //Chercher le produit
-//       const result: DbResult = await user.Update(newUser);
+      //Renvoyer la réponse
+      res.status(201).json({ "User updated": user })
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
 
-//       //Renvoyer la réponse
-//       result.user
-//         ? res.status(result.code).json({ "User updated": result.user })
-//         : res.status(result.code).send(result.message);
-//     } catch (e: any) {
-//       //Log l'erreur
-//       console.error(e);
-
-//       //Retourner l'erreur
-//       res.status(500).send("Error while updating user");
-//     }
-//   }
-// );
+      //Retourner l'erreur
+      res.status(500).send("Error while updating user");
+    }
+  }
+);
 
 // //Supprimer un utilisateur
 // router.delete(
