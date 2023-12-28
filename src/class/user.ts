@@ -46,59 +46,6 @@ export default class User {
   }
 
   /**
-   * AddToDb
-   */
-  public async AddToDb(role: number): Promise<DbResult> {
-    try {
-      const encryptedPassword: string = await bcrypt.hash(
-        this.password.toString(),
-        15
-      );
-
-      console.log(role);
-      
-
-      //Créer l'utilisateur
-      const user = await prisma.user.create({
-        data: {
-          lastName: this.lastName.toString(),
-          firstName: this.firstName.toString(),
-          email: this.email.toString(),
-          password: encryptedPassword,
-          role: parseInt(role.toString()),
-        },
-      });
-
-      //Créer la réponse
-      const response: DbResult = {
-        code: 201,
-        message: "User created",
-        user: user,
-      };
-
-      //Retourner la réponse
-      return response;
-    } catch (e: any) {
-      //Log l'erreur
-      console.error(e);
-
-      //Créer la réponse
-      let error: DbResult = {
-        code: 500,
-        message: "An error has occured",
-      };
-      if (e.code == "P2002") {
-        error.code = 409;
-        error.message = "Mail already existing";
-        return error;
-      }
-
-      //Retourner la réponse
-      return error;
-    }
-  }
-
-  /**
    * FindByEmail
    */
   public async FindByEmail(): Promise<DbResult> {
