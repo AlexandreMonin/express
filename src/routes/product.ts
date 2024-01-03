@@ -35,34 +35,38 @@ router.get(
     }
   }
 );
-// //Récupérer un produit grâce à son id
-// router.get(
-//   "/:id",
-//   passport.authenticate("jwt", {session: false}),
-//   isAdminOrManager,
-//   async (req: Request<{ id: string }>, res: Response) => {
-//     const id: number = parseInt(req.params.id);
 
-//     //Créer le produit
-//     const product: Product = new Product({ id: id, name: "", price: 0.0 });
+//Récupérer un produit grâce à son id
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  isAdminOrManager,
+  async (req: Request<{ id: string }>, res: Response) => {
+    const id: number = parseInt(req.params.id);
 
-//     try {
-//       //Chercher le produit
-//       const result: DbResult = await product.FindById();
+    try {
+      //Chercher le produit
+      const product = await prisma.product.findUnique({
+        where: {
+          id: id,
+        },
+      });
 
-//       //Renvoyer la réponse
-//       result.product
-//         ? res.status(result.code).json({ "product": result.product })
-//         : res.status(result.code).send(result.message);
-//     } catch (e: any) {
-//       //Log l'erreur
-//       console.error(e);
+      //Renvoyer la réponse
+      if (!product) {
+        res.status(404).send("product not found");
+      } else {
+        res.status(200).json({ "product": product });
+      }
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
 
-//       //Retourner l'erreur
-//       res.status(500).send("Error while adding product");
-//     }
-//   }
-// );
+      //Retourner l'erreur
+      res.status(500).send("Internal server error");
+    }
+  }
+);
 
 //Créer un produit
 router.post("/add",
@@ -87,65 +91,83 @@ router.post("/add",
     }
   });
 
-// //Modifier un produit
-// router.patch(
-//   "/:id",
-//   isAdminOrManager,
-//   async (req: Request<{ id: string }, {}, Product>, res: Response) => {
-//     const id: number = parseInt(req.params.id);
-//     const newProduct: Product = req.body;
+//Modifier un produit
+router.patch(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  isAdminOrManager,
+  async (req: Request<{}, {}, Product>, res: Response) => {
+    const newProduct: Product = req.body;
 
-//     //Créer le produit
-//     const product: Product = new Product({ id: id, name: "", price: 0.0 });
+    try {
+      if (!newProduct.id) {
+        res.status(409).send("Please add the 'id' to the body");
+      } else {
+        //Chercher le produit
+        const product = await prisma.product.update({
+          where: {
+            id: parseInt(newProduct.id.toString()),
+          },
+          data: {
+            name: newProduct.name?.toString(),
+            description: newProduct.description?.toString(),
+            price: parseFloat(newProduct?.price.toString()),
+          },
+        });
+        //Renvoyer la réponse
+        res.status(200).json({ "product updated": product });
+      }
 
-//     try {
-//       //Chercher le produit
-//       const result: DbResult = await product.Update(newProduct);
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
 
-//       //Renvoyer la réponse
-//       result.product
-//         ? res.status(result.code).json({ "product": result.product })
-//         : res.status(result.code).send(result.message);
-//     } catch (e: any) {
-//       //Log l'erreur
-//       console.error(e);
+      //Retourner l'erreur
+      if (e.code == 'P2025') {
+        res.status(404).send("Product to update not found.");
+      } else {
+        res.status(500).send("Error while updating the product");
+      }
+    }
+  }
+);
 
-//       //Retourner l'erreur
-//       res.status(500).send("Error while updating the product");
-//     }
-//   }
-// );
+//Supprimer un produit
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  isAdminOrManager,
+  async (req: Request<{id: string}>, res: Response) => {
+    const id: number = parseInt(req.params.id.toString());
 
-// //Supprimer un produit
-// router.delete(
-//   "/:id",
-//   isAdminOrManager,
-//   async (req: Request<{ id: string }, {}, Product>, res: Response) => {
-//     const id: number = parseInt(req.params.id);
-//     const newProduct: Product = req.body;
+    try {
+      if (!id) {
+        res.status(409).send("Please add the 'id' to the url");
+      } else {
+      //Chercher le produit
+      const product = await prisma.product.delete({
+        where: {
+          id: id,
+        },
+      });
 
-//     console.log(newProduct);
+      //Renvoyer la réponse
+      res.status(200).json({ "product_deleted": product })
+    }
+      
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
 
-//     //Créer le produit
-//     const product: Product = new Product({ id: id, name: "", price: 0.0 });
-
-//     try {
-//       //Chercher le produit
-//       const result: DbResult = await product.Delete();
-
-//       //Renvoyer la réponse
-//       result.product
-//         ? res.status(result.code).json({ "product": result.product })
-//         : res.status(result.code).send(result.message);
-//     } catch (e: any) {
-//       //Log l'erreur
-//       console.error(e);
-
-//       //Retourner l'erreur
-//       res.status(500).send("Error while adding product");
-//     }
-//   }
-// );
+      //Retourner l'erreur
+      if (e.code == 'P2025') {
+        res.status(404).send("Product to delete not found.");
+      } else {
+        res.status(500).send("Error while deleting the product");
+      }
+    }
+  }
+);
 
 //Exporter le router
 export default router;
