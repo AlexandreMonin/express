@@ -1,8 +1,4 @@
 import express, { Router, Request, Response } from "express";
-import DbResult from "../type/DbResult";
-import UserRole from "../type/UserRole";
-import isManager from "../middlewares/isManager";
-import isAdmin from "../middlewares/isAdmin";
 import isAdminOrManager from "../middlewares/isAdminOrManager";
 import passport from "passport";
 import prisma from "../utils/database";

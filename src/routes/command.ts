@@ -1,13 +1,9 @@
 import express, { Router, Request, Response } from "express";
-import isManager from "../middlewares/isManager";
-import isAdmin from "../middlewares/isAdmin";
-import Command from "../class/command";
-import DbResult from "../type/DbResult";
-import User from "../class/user";
-import Orders_Products from "../class/orders_products";
 import prisma from "../utils/database";
 import isAdminOrManager from "../middlewares/isAdminOrManager";
 import passport from "passport";
+import User from "../type/User";
+import { Orders_Products } from "@prisma/client";
 
 //Définir le router
 const router: Router = express.Router();

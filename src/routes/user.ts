@@ -1,6 +1,5 @@
 import express, { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import DbResult from "../type/DbResult";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 import isAdmin from "../middlewares/isAdmin";
