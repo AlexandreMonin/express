@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import userRouter from "./routes/user";
 import commandRouter from "./routes/command";
 import productRouter from "./routes/product";
@@ -15,12 +16,8 @@ async function main() {
   //Parser automatiquement les body entrant en json
   app.use(express.json());
 
+  app.use(cors());
   app.use(passport.initialize());
-
-  //Définir les routes
-  app.get("/", (req, res) => {
-    res.status(200).send("Bienvenue !");
-  });
 
   //Utiliser les routes définies dans les router
 
