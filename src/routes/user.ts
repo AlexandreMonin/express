@@ -5,6 +5,7 @@ import passport from "passport";
 import isAdmin from "../middlewares/isAdmin";
 import prisma from "../utils/database";
 import User from "../type/User";
+import { signinValidator } from "../middlewares/formValidator";
 
 //Définir le router
 const router: Router = express.Router();
@@ -110,7 +111,7 @@ router.post(
 );
 
 //Authentifier un utlisateur
-router.post("/signin", async (req: Request<{}, {}, User>, res: Response) => {
+router.post("/signin", signinValidator, async (req: Request<{}, {}, User>, res: Response) => {
   const auth: User = req.body;
 
   try {

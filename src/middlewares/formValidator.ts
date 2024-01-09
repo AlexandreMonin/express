@@ -9,7 +9,9 @@ export const signinValidator = [
     console.log(result);
     if (result.isEmpty()) {
       next();
-    }  
-    res.status(409).send({ errors: result.array() });
+    }
+    else{
+      res.status(409).send({ errors: result.array() });
+    }
   },
 ];
