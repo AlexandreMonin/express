@@ -160,7 +160,7 @@ router.patch(
       if(newUser.password){
         encryptedPassword = await bcrypt.hash(
           newUser.password.toString(),
-          15
+          8
         );
       }
       
