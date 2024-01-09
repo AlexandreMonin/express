@@ -43,6 +43,37 @@ router.get(
   }
 );
 
+//Récupérer une commande grâce à son id
+router.get(
+  "/",
+  isAdminOrManager,
+  async (req: Request, res: Response) => {
+
+    try {
+      const commands = await prisma.command.findMany({
+        include: {
+          Orders_Products: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+
+      //Retourner la réponse
+      res.status(200).json({
+        commands: commands,
+      });
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Retourner la réponse
+      res.status(500).send("An error has occured");
+    }
+  }
+);
+
 //Créer une commande
 router.post(
   "/add",
