@@ -7,6 +7,7 @@ import User from "../class/user";
 import Orders_Products from "../class/orders_products";
 import prisma from "../utils/database";
 import isAdminOrManager from "../middlewares/isAdminOrManager";
+import passport from "passport";
 
 //Définir le router
 const router: Router = express.Router();
@@ -23,22 +24,22 @@ router.get(
         where: {
           id: id,
         },
+        include: {
+          Orders_Products: {
+            include: {
+              product: true
+            }
+          }
+        }
       });
 
       //Retourner la réponse
-      res.status(201).json({
-        message: "Command created",
+      res.status(200).json({
         command: command,
       });
     } catch (e: any) {
       //Log l'erreur
       console.error(e);
-
-      //Créer la réponse
-      let error: DbResult = {
-        code: 500,
-        message: "An error has occured",
-      };
 
       //Retourner la réponse
       res.status(500).send("An error has occured");
@@ -49,9 +50,8 @@ router.get(
 //Créer une commande
 router.post(
   "/add",
-  async (req: Request<{}, {}, Orders_Products[]>, res: Response) => {
-    const products: Orders_Products[] = req.body;
-    console.log(products);
+  passport.authenticate("jwt", { session: false }),
+  async (req: Request, res: Response) => {
     const user: User = req.user as User;
 
     try {
@@ -63,32 +63,54 @@ router.post(
         },
       });
 
-      const product = await prisma.orders_Products.createMany({
-        data: products.map((prod) => ({
-          productId: prod.productId,
-          commandId: command.id,
-          quantity: prod.quantity,
-        })),
-      });
-
       //Retourner la réponse
       res.status(201).json({
-        message: "Command created",
+        message: "Command created, don't forget your command number !",
         command: command,
-        products: products,
       });
     } catch (e: any) {
       //Log l'erreur
       console.error(e);
 
-      //Créer la réponse
-      let error: DbResult = {
-        code: 500,
-        message: "An error has occured",
-      };
-
       //Retourner la réponse
       res.status(500).send("An error has occured");
+    }
+  }
+);
+
+//Ajouter des produits à une commande
+router.post(
+  "/addProduct",
+  passport.authenticate("jwt", { session: false }),
+  async (req: Request<{}, {}, Orders_Products>, res: Response) => {
+    const orders_Products: Orders_Products = req.body;
+
+    try {
+      //Créer la commande
+      const order = await prisma.orders_Products.create({
+        data: {
+          commandId: orders_Products.commandId,
+          productId: orders_Products.productId,
+          quantity: orders_Products.quantity,
+        },
+      });
+
+      //Retourner la réponse
+      res.status(201).json({
+        message: "Added to the command",
+        order: order,
+      });
+    } catch (e: any) {
+      //Log l'erreur
+      console.error(e);
+
+      //Retourner la réponse
+      if(e.code == 'P2003'){
+        res.status(500).send("The product or the command doesn't exist");
+      } else {
+        res.status(500).send("An error has occured");
+      }
+
     }
   }
 );
@@ -97,8 +119,7 @@ router.post(
 router.patch(
   "/",
   isAdminOrManager,
-  async (req: Request<{ id: string }, {}, Orders_Products>, res: Response) => {
-    const id: number = parseInt(req.params.id);
+  async (req: Request<{}, {}, Orders_Products>, res: Response) => {
     const product: Orders_Products = req.body;
 
     try {
