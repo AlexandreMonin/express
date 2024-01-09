@@ -87,8 +87,17 @@ router.post(
 
     try {
       //Créer la commande
-      const order = await prisma.orders_Products.create({
-        data: {
+      const order = await prisma.orders_Products.upsert({
+        where: {
+          commandId_productId: {
+            commandId: orders_Products.commandId,
+            productId: orders_Products.productId,
+          },
+        },
+        update: {
+          quantity: orders_Products.quantity,
+        },
+        create: {
           commandId: orders_Products.commandId,
           productId: orders_Products.productId,
           quantity: orders_Products.quantity,
@@ -105,53 +114,12 @@ router.post(
       console.error(e);
 
       //Retourner la réponse
-      if(e.code == 'P2003'){
+      if (e.code == 'P2003') {
         res.status(500).send("The product or the command doesn't exist");
       } else {
         res.status(500).send("An error has occured");
       }
 
-    }
-  }
-);
-
-//Modifier une commande
-router.patch(
-  "/",
-  isAdminOrManager,
-  async (req: Request<{}, {}, Orders_Products>, res: Response) => {
-    const product: Orders_Products = req.body;
-
-    try {
-      const db = await prisma.orders_Products.update({
-        where: {
-          commandId_productId: {
-            commandId: product.commandId,
-            productId: product.productId,
-          },
-        },
-        data: {
-          quantity: product.quantity,
-        },
-      });
-
-      //Retourner la réponse
-      res.status(201).json({
-        message: "Command modified",
-        product: db,
-      });
-    } catch (e: any) {
-      //Log l'erreur
-      console.error(e);
-
-      //Créer la réponse
-      let error: DbResult = {
-        code: 500,
-        message: "An error has occured",
-      };
-
-      //Retourner la réponse
-      res.status(500).send("An error has occured");
     }
   }
 );
@@ -164,36 +132,35 @@ router.delete(
     const id: number = parseInt(req.params.id);
 
     try {
-      const orders_Products = await prisma.orders_Products.deleteMany({
+
+      const orders = await prisma.orders_Products.deleteMany({
         where: {
-          commandId: id,
-        },
+          commandId: id
+        }
       });
 
       const command = await prisma.command.deleteMany({
         where: {
-          id: id,
+          id: id
         },
       });
 
       //Retourner la réponse
-      res.status(200).json({
-        message: "Command supprimé",
-        command: command,
-        product: orders_Products,
-      });
+      if (command.count == 0) {
+        res.status(404).send("Command not found");
+      } else {
+        res.status(200).send("Command deleted");
+      }
     } catch (e: any) {
       //Log l'erreur
       console.error(e);
 
-      //Créer la réponse
-      let error: DbResult = {
-        code: 500,
-        message: "An error has occured",
-      };
-
       //Retourner la réponse
-      res.status(500).send("An error has occured");
+      if (e.code == 'P2025') {
+        res.status(404).send("Command not found");
+      } else {
+        res.status(500).send("An error has occured");
+      }
     }
   }
 );
