@@ -82,7 +82,7 @@ router.post(
       //Crypter le mot de passe
       const encryptedPassword: string = await bcrypt.hash(
         user.password.toString(),
-        15
+        8
       );
       //Ajouter l'utilisateur en base
       const dbSave = await prisma.user.create({
